@@ -2,7 +2,7 @@
 
 import { Sora } from "next/font/google";
 import { useEffect, useState } from "react";
-import { getProviders, signIn, signOut, useSession } from "next-auth/react";
+import { getProviders, signIn } from "next-auth/react";
 import type { IconType } from "react-icons";
 import { FaGoogle } from "react-icons/fa";
 import { LuFacebook } from "react-icons/lu";
@@ -39,10 +39,10 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSocialSubmitting, setIsSocialSubmitting] = useState(false);
   const [availableSocialProviders, setAvailableSocialProviders] = useState<
     SocialProvider[]
   >([]);
-  const { data: session, status } = useSession();
 
   useEffect(() => {
     let isMounted = true;
@@ -71,8 +71,43 @@ export default function Home() {
     };
   }, []);
 
-  const handleSocialAuth = (provider: SocialProvider) => {
-    void signIn(provider, { callbackUrl: successRedirectUrl });
+  const handleSocialAuth = async (provider: SocialProvider) => {
+    setIsSocialSubmitting(true);
+
+    const authPromise = (async () => {
+      const result = await signIn(provider, {
+        callbackUrl: successRedirectUrl,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+
+      if (!result?.url) {
+        throw new Error(`Failed to open ${socialProviderMeta[provider].label} login.`);
+      }
+
+      return result.url;
+    })();
+
+    toast.promise(authPromise, {
+      loading: `Opening ${socialProviderMeta[provider].label} login...`,
+      success: "Redirecting...",
+      error: (error) =>
+        error instanceof Error
+          ? error.message
+          : "Social login failed. Please try again.",
+    });
+
+    try {
+      const url = await authPromise;
+      window.location.href = url;
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSocialSubmitting(false);
+    }
   };
 
   const handleCredentialSignup = async (
@@ -199,9 +234,6 @@ export default function Home() {
         <div className="p-8 md:p-12">
           <h1 className="text-2xl font-bold">Create account</h1>
           <p className="mt-2 text-sm text-white/60">Fill in the details below</p>
-          {status === "loading" && (
-            <p className="mt-3 text-xs text-white/50">Checking login session...</p>
-          )}
           <form className="mt-6 space-y-4" onSubmit={handleCredentialSignup}>
             <div>
               <label className="mb-2 block text-xs text-white/60" htmlFor="fullName">
@@ -319,7 +351,8 @@ export default function Home() {
                       <button
                         key={provider}
                         type="button"
-                        onClick={() => handleSocialAuth(provider)}
+                        onClick={() => void handleSocialAuth(provider)}
+                        disabled={isSocialSubmitting || isSubmitting}
                         className="flex w-full flex-1 basis-0 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3 text-xs hover:bg-white/10"
                       >
                         <Icon size={14} />
