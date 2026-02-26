@@ -21,6 +21,7 @@ const sora = Sora({
 const successRedirectUrl =
   process.env.NEXT_PUBLIC_SUCCESS_REDIRECT_URL?.trim() || "/";
 const oauthSuccessPath = "/auth-success";
+const googleSignupLockedStorageKey = "google_signup_locked";
 const parsedMinPasswordLength = Number.parseInt(
   process.env.NEXT_PUBLIC_MIN_PASSWORD_LENGTH ?? "8",
   10,
@@ -49,6 +50,7 @@ export default function Home() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSocialSubmitting, setIsSocialSubmitting] = useState(false);
+  const [isGoogleSignupLocked, setIsGoogleSignupLocked] = useState(false);
   const [availableSocialProviders, setAvailableSocialProviders] = useState<
     SocialProvider[]
   >([]);
@@ -81,12 +83,21 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    const isLocked = window.localStorage.getItem(googleSignupLockedStorageKey) === "1";
+    if (isLocked) {
+      setIsGoogleSignupLocked(true);
+    }
+  }, []);
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("error") !== "google_already_registered") {
       return;
     }
 
     toast.error("This Google account is already registered.");
+    setIsGoogleSignupLocked(true);
+    window.localStorage.setItem(googleSignupLockedStorageKey, "1");
     params.delete("error");
     const nextQuery = params.toString();
     const nextUrl = nextQuery
@@ -96,6 +107,11 @@ export default function Home() {
   }, []);
 
   const handleSocialAuth = async (provider: SocialProvider) => {
+    if (provider === "google" && isGoogleSignupLocked) {
+      toast.error("Google signup is disabled for this browser.");
+      return;
+    }
+
     setIsSocialSubmitting(true);
     const toastId = toast.loading(
       `Opening ${socialProviderMeta[provider].label} login...`,
@@ -364,7 +380,11 @@ export default function Home() {
                         key={provider}
                         type="button"
                         onClick={() => void handleSocialAuth(provider)}
-                        disabled={isSocialSubmitting || isSubmitting}
+                        disabled={
+                          isSocialSubmitting ||
+                          isSubmitting ||
+                          (provider === "google" && isGoogleSignupLocked)
+                        }
                         className="flex w-full flex-1 basis-0 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3 text-xs hover:bg-white/10"
                       >
                         <Icon size={14} />
