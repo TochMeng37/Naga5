@@ -80,6 +80,21 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error") !== "google_already_registered") {
+      return;
+    }
+
+    toast.error("This Google account is already registered.");
+    params.delete("error");
+    const nextQuery = params.toString();
+    const nextUrl = nextQuery
+      ? `${window.location.pathname}?${nextQuery}`
+      : window.location.pathname;
+    window.history.replaceState({}, "", nextUrl);
+  }, []);
+
   const handleSocialAuth = async (provider: SocialProvider) => {
     setIsSocialSubmitting(true);
     const toastId = toast.loading(

@@ -62,6 +62,9 @@ const handler = NextAuth({
         });
       } catch (error) {
         if (error instanceof DuplicateSignupError) {
+          if (source === "google") {
+            return "/?error=google_already_registered";
+          }
           return true;
         }
         console.error(`${source} signup logging failed:`, error);
