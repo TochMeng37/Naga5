@@ -202,33 +202,6 @@ export default function Home() {
           {status === "loading" && (
             <p className="mt-3 text-xs text-white/50">Checking login session...</p>
           )}
-          {session?.user && (
-            <div className="mt-4 flex items-center justify-between rounded-xl border border-white/15 bg-white/5 p-3">
-              <div className="flex items-center gap-3">
-                {session.user.image && (
-                  <img
-                    src={session.user.image}
-                    alt={session.user.name ?? "User avatar"}
-                    className="h-9 w-9 rounded-full object-cover"
-                  />
-                )}
-                <div>
-                  <p className="text-xs font-semibold text-white">
-                    {session.user.name ?? "Logged in user"}
-                  </p>
-                  <p className="text-[11px] text-white/60">{session.user.email}</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => void signOut({ callbackUrl: "/" })}
-                className="rounded-lg border border-white/20 px-3 py-1.5 text-[11px] hover:bg-white/10"
-              >
-                Log out
-              </button>
-            </div>
-          )}
-
           <form className="mt-6 space-y-4" onSubmit={handleCredentialSignup}>
             <div>
               <label className="mb-2 block text-xs text-white/60" htmlFor="fullName">
