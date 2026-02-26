@@ -5,15 +5,13 @@ import { useEffect, useState } from "react";
 import { getProviders, signIn } from "next-auth/react";
 import type { IconType } from "react-icons";
 import { FaGoogle } from "react-icons/fa";
-import { LuFacebook } from "react-icons/lu";
 import { toast } from "sonner";
 
-type SocialProvider = "google" | "facebook";
+type SocialProvider = "google";
 
 const socialProviderMeta: Record<SocialProvider, { label: string; Icon: IconType }> =
   {
     google: { label: "Google", Icon: FaGoogle },
-    facebook: { label: "Facebook", Icon: LuFacebook },
   };
 
 const sora = Sora({
