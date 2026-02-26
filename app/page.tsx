@@ -20,6 +20,7 @@ const sora = Sora({
 });
 const successRedirectUrl =
   process.env.NEXT_PUBLIC_SUCCESS_REDIRECT_URL?.trim() || "/";
+const oauthSuccessPath = "/auth-success";
 const parsedMinPasswordLength = Number.parseInt(
   process.env.NEXT_PUBLIC_MIN_PASSWORD_LENGTH ?? "8",
   10,
@@ -28,6 +29,16 @@ const minPasswordLength =
   Number.isFinite(parsedMinPasswordLength) && parsedMinPasswordLength > 0
     ? parsedMinPasswordLength
     : 8;
+
+type DataLayerWindow = Window & {
+  dataLayer?: Array<Record<string, unknown>>;
+};
+
+function pushDataLayerEvent(eventName: string) {
+  const windowWithDataLayer = window as DataLayerWindow;
+  windowWithDataLayer.dataLayer = windowWithDataLayer.dataLayer ?? [];
+  windowWithDataLayer.dataLayer.push({ event: eventName });
+}
 
 export default function Home() {
   const [showConfirm, setShowConfirm] = useState(false);
@@ -74,10 +85,14 @@ export default function Home() {
     const toastId = toast.loading(
       `Opening ${socialProviderMeta[provider].label} login...`,
     );
+    const callbackParams = new URLSearchParams({
+      provider,
+      userCreated: "true",
+    });
 
     try {
       await signIn(provider, {
-        callbackUrl: successRedirectUrl,
+        callbackUrl: `${oauthSuccessPath}?${callbackParams.toString()}`,
       });
       // Fallback message in case redirect is delayed/blocked by the browser.
       toast.success("Redirecting...", { id: toastId });
@@ -154,7 +169,7 @@ export default function Home() {
 
     toast.promise(signupPromise, {
       loading: "Creating account...",
-      success: "Account created. Redirecting...",
+      success: "Register success",
       error: (error) =>
         error instanceof Error
           ? error.message
@@ -163,7 +178,10 @@ export default function Home() {
 
     try {
       await signupPromise;
-      window.location.href = successRedirectUrl;
+      pushDataLayerEvent("complete_registration");
+      window.setTimeout(() => {
+        window.location.href = successRedirectUrl;
+      }, 300);
     } catch (error) {
       console.error(error);
     } finally {
