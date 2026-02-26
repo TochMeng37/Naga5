@@ -73,38 +73,19 @@ export default function Home() {
 
   const handleSocialAuth = async (provider: SocialProvider) => {
     setIsSocialSubmitting(true);
-
-    const authPromise = (async () => {
-      const result = await signIn(provider, {
-        callbackUrl: successRedirectUrl,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        throw new Error(result.error);
-      }
-
-      if (!result?.url) {
-        throw new Error(`Failed to open ${socialProviderMeta[provider].label} login.`);
-      }
-
-      return result.url;
-    })();
-
-    toast.promise(authPromise, {
-      loading: `Opening ${socialProviderMeta[provider].label} login...`,
-      success: "Redirecting...",
-      error: (error) =>
-        error instanceof Error
-          ? error.message
-          : "Social login failed. Please try again.",
-    });
+    const toastId = toast.loading(
+      `Opening ${socialProviderMeta[provider].label} login...`,
+    );
 
     try {
-      const url = await authPromise;
-      window.location.href = url;
+      await signIn(provider, {
+        callbackUrl: successRedirectUrl,
+      });
+      // Fallback message in case redirect is delayed/blocked by the browser.
+      toast.success("Redirecting...", { id: toastId });
     } catch (error) {
       console.error(error);
+      toast.error("Social login failed. Please try again.", { id: toastId });
     } finally {
       setIsSocialSubmitting(false);
     }
