@@ -246,10 +246,10 @@ export default function Home() {
 
           <div className="absolute inset-0 z-10 flex flex-col justify-between p-10">
             <div>
-              <h2 className="text-3xl font-bold leading-tight">NAGA 5</h2>
+              <h2 className="text-3xl font-bold leading-tight">NAGA FIVE MEMBER PORTAL</h2>
               <p className="mt-3 max-w-sm text-sm text-white/80">
-                Create your account and start instantly with NAGA 5 across
-                Southeast Asia.
+                Secure member access for account services, personalized updates,
+                and exclusive community features.
               </p>
             </div>
 
@@ -260,8 +260,8 @@ export default function Home() {
         </div>
 
         <div className="p-8 md:p-12">
-          <h1 className="text-2xl font-bold">Create account</h1>
-          <p className="mt-2 text-sm text-white/60">Fill in the details below</p>
+          <h1 className="text-2xl font-bold">Join the member portal</h1>
+          <p className="mt-2 text-sm text-white/60">Create your account to access personalized features</p>
           <form className="mt-6 space-y-4" onSubmit={handleCredentialSignup}>
             <div>
               <label className="mb-2 block text-xs text-white/60" htmlFor="fullName">
@@ -359,8 +359,12 @@ export default function Home() {
               disabled={isSubmitting || !acceptedTerms}
               className="w-full rounded-xl bg-[#ff4d5a] py-3 text-sm font-semibold shadow-lg shadow-[#ff4d5a]/30 transition hover:brightness-110"
             >
-              {isSubmitting ? "Creating..." : "Create Account"}
+              {isSubmitting ? "Creating..." : "Create Free Account"}
             </button>
+
+            <p className="text-[11px] leading-relaxed text-white/50">
+              This platform provides football news and match information only. We do not offer betting or gambling services.
+            </p>
 
             {availableSocialProviders.length > 0 && (
               <>

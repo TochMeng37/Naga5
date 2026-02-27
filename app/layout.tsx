@@ -17,8 +17,9 @@ const geistMono = Geist_Mono({
 const gtmId = "GTM-NGMLPCPW";
 
 export const metadata: Metadata = {
-  title: "Situs 5 Naga",
-  description: "Platform hiburan online modern dengan pengalaman interaktif, desain menarik, dan akses cepat. Temukan keseruan digital di 5 Naga sekarang.",
+  title: "Naga Five | Member Access Portal",
+  description:
+    "Secure member access portal for community updates, personalized content, and account services. No betting or gambling services.",
   icons: {
     icon: "/icon.png",
     shortcut: "/icon.png",
